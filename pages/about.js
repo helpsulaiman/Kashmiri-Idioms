@@ -16,7 +16,7 @@ export default function AboutPage() {
         
         <div style={{backgroundColor: 'white', padding: '2rem', borderRadius: '0.5rem', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', maxWidth: '48rem', margin: '0 auto'}}>
           <div style={{borderBottom: '1px solid #2563eb', paddingBottom: '1rem', marginBottom: '1.5rem'}}>
-            <h2 style={{fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '0.5rem'}}>DYD'S SPIRIT</h2>
+            <h2 style={{fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '0.5rem'}}>DYD&rsquo;S SPIRIT</h2>
           </div>
           
           <div style={{marginBottom: '3rem'}}>
