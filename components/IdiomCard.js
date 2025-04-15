@@ -36,17 +36,21 @@ export default function IdiomCard({ idiom }) {
 
   const handleClose = () => {
     if (modalRef.current && cardBounds) {
-      modalRef.current.style.transform = 'none'
-      modalRef.current.style.width = `${cardBounds.width}px`
-      modalRef.current.style.left = `${cardBounds.left}px`
-      modalRef.current.style.top = `${cardBounds.top}px`
-      modalRef.current.style.opacity = '0'
+      modalRef.current.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+      modalRef.current.style.transform = 'none';
+      modalRef.current.style.width = `${cardBounds.width}px`;
+      modalRef.current.style.left = `${cardBounds.left}px`;
+      modalRef.current.style.top = `${cardBounds.top}px`;
+      modalRef.current.style.opacity = '0';
 
-      setTimeout(() => {
-        setExpanded(false)
-        setCardBounds(null)
-        setIsAnimating(false)
-      }, 600)
+      const onTransitionEnd = () => {
+        modalRef.current.removeEventListener('transitionend', onTransitionEnd);
+        setExpanded(false);
+        setCardBounds(null);
+        setIsAnimating(false);
+      };
+      
+      modalRef.current.addEventListener('transitionend', onTransitionEnd);
     }
   }
 
@@ -76,7 +80,7 @@ export default function IdiomCard({ idiom }) {
         bottom: 0,
         left: 0,
         zIndex: 50,
-        backgroundColor: expanded ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0)',
+        backgroundColor: expanded ? 'rgba(0, 0, 0, 0.5)' : isAnimating ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0)',
         transition: 'background-color 0.3s ease-out',
         pointerEvents: expanded ? 'auto' : 'none',
         opacity: isAnimating ? (expanded ? 1 : 0) : (expanded ? 1 : 0)
@@ -236,7 +240,7 @@ export default function IdiomCard({ idiom }) {
           padding: '1rem',
           cursor: 'pointer',
           transition: 'all 0.3s ease',
-          visibility: expanded || isAnimating ? 'hidden' : 'visible',
+          opacity: expanded || isAnimating ? 0 : 1,
           height: '180px',
           width: '100%',
           display: 'flex',
@@ -251,35 +255,38 @@ export default function IdiomCard({ idiom }) {
             fontWeight: 'bold', 
             marginBottom: '0.4rem', 
             color: '#1f2937',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis'
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden'
           }}>
-            {idiom.idiom_kashmiri.length > 25 
-              ? `${idiom.idiom_kashmiri.substring(0, 25)}...` 
-              : idiom.idiom_kashmiri}
+            {idiom.idiom_kashmiri}
           </h2>
           
           <p style={{
             color: '#4b5563', 
             marginBottom: '0.4rem', 
             fontStyle: 'italic',
-            fontSize: '0.9rem'
+            fontSize: '0.9rem',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden'
           }}>
-            {idiom.transliteration.length > 30 
-              ? `${idiom.transliteration.substring(0, 30)}...` 
-              : idiom.transliteration}
+            {idiom.transliteration}
           </p>
           
           <p style={{
             color: '#1f2937', 
             fontWeight: '500', 
             marginBottom: '0.5rem',
-            fontSize: '0.9rem'
+            fontSize: '0.9rem',
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden'
           }}>
-            {idiom.translation.length > 50 
-              ? `${idiom.translation.substring(0, 50)}...` 
-              : idiom.translation}
+            {idiom.translation}
           </p>
         </div>
         

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
+import { verifyAdminPassword } from '../../lib/adminAuth'
 import Header from '../../components/Header'
 
 export default function DashboardLogin() {
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [error, setError] = useState(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -14,13 +15,19 @@ export default function DashboardLogin() {
     }
   }, [])
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault()
-    if (password === 'kashmir123') { // Change this to a secure password
-      localStorage.setItem('admin-auth', 'true')
-      router.push('/dashboard/manage/idioms')
-    } else {
-      setError('Incorrect password')
+    setError(null)
+
+    try {
+      if (await verifyAdminPassword(password)) {
+        localStorage.setItem('admin-auth', 'true')
+        router.push('/dashboard/manage/idioms')
+      } else {
+        setError('Incorrect password')
+      }
+    } catch (err) {
+      setError(err.message)
     }
   }
 

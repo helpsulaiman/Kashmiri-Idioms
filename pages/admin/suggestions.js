@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/router'
+import { verifyAdminPassword } from '../../../lib/adminAuth'
 import Header from '../../components/Header'
 import AdminNav from '../../components/AdminNav'
-// import { ThemeContext } from '../../context/ThemeContext'
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -17,34 +17,35 @@ export default function SuggestionsAdmin() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const router = useRouter()
-  // Theme context removed
-  
-  // All useEffect hooks need to be at the top level
+
+  // Check existing authentication
   useEffect(() => {
-    // Check if already authenticated
     if (localStorage.getItem('admin-auth') === 'true') {
       setIsAuthenticated(true)
     }
   }, [])
-  
+
   // Fetch suggestions when authenticated
   useEffect(() => {
     if (isAuthenticated) {
       fetchSuggestions()
     }
   }, [isAuthenticated])
-  
-  // Simple password check
+
   const handleLogin = (e) => {
     e.preventDefault()
-    if (password === 'kashmir123') {
-      setIsAuthenticated(true)
-      localStorage.setItem('admin-auth', 'true')
-    } else {
-      alert('Incorrect password')
+    try {
+      if (verifyAdminPassword(password)) {
+        setIsAuthenticated(true)
+        localStorage.setItem('admin-auth', 'true')
+      } else {
+        setError('Incorrect password')
+      }
+    } catch (err) {
+      setError(err.message)
     }
   }
-  
+
   if (!isAuthenticated) {
     return (
       <div style={{minHeight: '100vh', backgroundColor: '#f3f4f6'}}>
@@ -52,6 +53,11 @@ export default function SuggestionsAdmin() {
         <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem 0'}}>
           <form onSubmit={handleLogin} style={{backgroundColor: 'white', padding: '2rem', borderRadius: '0.5rem', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', width: '100%', maxWidth: '28rem'}}>
             <h1 style={{fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1.5rem', color: '#111827', textAlign: 'center'}}>Admin Login</h1>
+            {error && (
+              <div style={{backgroundColor: '#fee2e2', border: '1px solid #fecaca', color: '#b91c1c', padding: '1rem', borderRadius: '0.5rem', marginBottom: '1.5rem'}}>
+                {error}
+              </div>
+            )}
             <div style={{marginBottom: '1rem'}}>
               <label style={{display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem'}}>Password</label>
               <input 
@@ -66,7 +72,7 @@ export default function SuggestionsAdmin() {
                   backgroundColor: 'white', 
                   color: '#111827'
                 }}
-                placeholder="Enter admin password"
+                required
               />
             </div>
             <button 
@@ -89,8 +95,6 @@ export default function SuggestionsAdmin() {
       </div>
     )
   }
-
-
 
   const fetchSuggestions = async () => {
     try {
@@ -307,7 +311,7 @@ export default function SuggestionsAdmin() {
       
       <footer style={{backgroundColor: '#1f2937', color: 'white', padding: '1.5rem 0', marginTop: '3rem'}}>
         <div style={{maxWidth: '1200px', margin: '0 auto', padding: '0 1rem', textAlign: 'center'}}>
-          <p>© {new Date().getFullYear()} Kashmiri Idioms Project</p>
+          <p> {new Date().getFullYear()} Kashmiri Idioms Project</p>
           <p style={{fontSize: '0.875rem', marginTop: '0.5rem', color: '#9ca3af'}}>Made by @helpsulaiman</p>
         </div>
       </footer>

@@ -7,6 +7,23 @@ import Header from '../components/Header'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 const supabase = createClient(supabaseUrl, supabaseKey)
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const { data, error } = await supabase
+      .from('simple_suggestions')
+      .insert({
+        idiom_kashmiri: formData.idiom_kashmiri,
+        translation: formData.translation,
+        submitter_email: formData.submitter_email
+      });
+
+    if (error) throw error;
+    setSubmitted(true);
+  } catch (error) {
+    setError("Submission failed: " + error.message);
+  }
+};
 
 export default function SuggestPage() {
   // Theme context removed
@@ -57,10 +74,9 @@ export default function SuggestPage() {
     setError(null)
 
     try {
-      // Insert the suggestion into a 'suggestions' table
-      const { error } = await supabase
-        .from('suggestions')
-        .insert([{
+      // Use a stored procedure for safer insertion
+      const { data, error } = await supabase.rpc('submit_suggestion', {
+        idiom_data: {
           idiom_kashmiri: formData.idiom_kashmiri,
           transliteration: formData.transliteration,
           translation: formData.translation,
@@ -68,9 +84,9 @@ export default function SuggestPage() {
           tags: formData.tags,
           submitter_name: formData.submitter_name,
           submitter_email: formData.submitter_email,
-          notes: formData.notes,
-          status: 'pending' // Default status for new suggestions
-        }])
+          notes: formData.notes
+        }
+      })
 
       if (error) throw error
 
@@ -192,26 +208,7 @@ export default function SuggestPage() {
                     />
                   </div>
                   
-                  <div>
-                    <label style={{display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem'}}>
-                      Your Name <span style={{color: '#dc2626'}}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="submitter_name"
-                      value={formData.submitter_name}
-                      onChange={handleInputChange}
-                      style={{
-                        width: '100%', 
-                        padding: '0.75rem', 
-                        border: '1px solid #d1d5db', 
-                        borderRadius: '0.375rem', 
-                        backgroundColor: 'white', 
-                        color: '#111827'
-                      }}
-                      required
-                    />
-                  </div>
+                  
                 </div>
                 
                 <div>
@@ -306,6 +303,26 @@ export default function SuggestPage() {
                 
                 <div>
                   <label style={{display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem'}}>
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    name="submitter_name"
+                    value={formData.submitter_name}
+                    onChange={handleInputChange}
+                    style={{
+                      width: '100%', 
+                      padding: '0.75rem', 
+                      border: '1px solid #d1d5db', 
+                      borderRadius: '0.375rem', 
+                      backgroundColor: 'white', 
+                      color: '#111827'
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem'}}>
                     Your Email <span style={{color: '#dc2626'}}>*</span>
                   </label>
                   <input
@@ -374,7 +391,7 @@ export default function SuggestPage() {
       
       <footer style={{backgroundColor: '#1f2937', color: 'white', padding: '1.5rem 0', marginTop: '3rem'}}>
         <div style={{maxWidth: '1200px', margin: '0 auto', padding: '0 1rem', textAlign: 'center'}}>
-          <p>© {new Date().getFullYear()} Kashmiri Idioms Project</p>
+          <p> 2023 Kashmiri Idioms Project</p>
           <p style={{fontSize: '0.875rem', marginTop: '0.5rem', color: '#9ca3af'}}>Made by @helpsulaiman</p>
         </div>
       </footer>
