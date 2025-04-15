@@ -4,7 +4,7 @@ const nextConfig = {
   images: {
     domains: ['res.cloudinary.com'], // Add any other image domains you use
   },
-  swcMinify: true,
+  //swcMinify: true,
   poweredByHeader: false,
   compress: true,
   experimental: {

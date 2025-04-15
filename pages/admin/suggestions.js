@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/router'
-import { verifyAdminPassword } from '../../../lib/adminAuth'
+import { verifyAdminPassword } from '../../lib/adminAuth'
 import Header from '../../components/Header'
 import AdminNav from '../../components/AdminNav'
 
