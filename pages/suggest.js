@@ -67,16 +67,16 @@ export default function SuggestPage() {
       tags: formData.tags.filter(tag => tag !== tagToRemove)
     })
   }
-
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
 
     try {
-      // Use a stored procedure for safer insertion
-      const { data, error } = await supabase.rpc('submit_suggestion', {
-        idiom_data: {
+      // Direct insertion instead of using stored procedure
+      const { data, error } = await supabase
+        .from('suggestions') // Make sure this matches your table name exactly
+        .insert([{
           idiom_kashmiri: formData.idiom_kashmiri,
           transliteration: formData.transliteration,
           translation: formData.translation,
@@ -84,9 +84,9 @@ export default function SuggestPage() {
           tags: formData.tags,
           submitter_name: formData.submitter_name,
           submitter_email: formData.submitter_email,
-          notes: formData.notes
-        }
-      })
+          notes: formData.notes,
+          status: 'pending' // Explicitly set status
+        }])
 
       if (error) throw error
 
@@ -104,12 +104,18 @@ export default function SuggestPage() {
       setSubmitted(true)
     } catch (error) {
       console.error('Error submitting suggestion:', error)
-      setError('Failed to submit suggestion. Please try again.')
+      
+      // Check for network errors
+      if (!navigator.onLine) {
+        setError('Network error: Please check your internet connection and try again.')
+      } else if (error.message && error.message.includes('network')) {
+        setError('Network error: Unable to reach the server. Please try again later.')
+      } else {
+        setError(`Failed to submit suggestion: ${error.message || 'Unknown error occurred'}. Please try again.`)
+      }
     } finally {
       setLoading(false)
-    }
-  }
-
+    }  }
   return (
     <div style={{minHeight: '100vh', backgroundColor: '#f3f4f6'}}>
       <Header />
@@ -137,8 +143,17 @@ export default function SuggestPage() {
         ) : (
           <div style={{backgroundColor: 'white', padding: '1.5rem', borderRadius: '0.5rem', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'}}>
             {error && (
-              <div style={{backgroundColor: '#fee2e2', border: '1px solid #fecaca', color: '#b91c1c', padding: '1rem', borderRadius: '0.5rem', marginBottom: '1.5rem'}}>
-                {error}
+              <div style={{
+                backgroundColor: '#fee2e2', 
+                border: '1px solid #fecaca', 
+                color: '#b91c1c', 
+                padding: '1rem', 
+                borderRadius: '0.5rem', 
+                marginBottom: '1.5rem',
+                fontWeight: 'medium'
+              }}>
+                <p style={{ marginBottom: '0.5rem', fontWeight: 'bold' }}>Error:</p>
+                <p>{error}</p>
               </div>
             )}
             
